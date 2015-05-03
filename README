@@ -152,7 +152,7 @@ file from UFRaw GUI as the camera profile, make sure gamma
 and linearity are both set to 1.0.
 
 Particularly for DCRaw, you can use the following command:
-# dcraw -v -w -H 0 -o 1 -p my.icc -W -g 1 1 -f -m 1 -T _MG_1234.SRW
+# dcraw -v -w -H 0 -o 1 -p my.icc -W -g 1 1 -f -m 1 -T _MG_1234.CR2
 
 
 Testing The Profile
@@ -214,3 +214,10 @@ A: Depending on your version of ArgyllCMS it may or may not
    have been linked against a version of libtiff with deflate
    support. Disabling compression makes sure your TIFFs will
    be compatible.
+
+Q: Can profiles be used interchangably between RAW converters
+A: Since RAW files aren't self-descriptive, decoding a RAW,
+   requires RAW converters to apply arbitrary parameters to
+   be able to make sense of the data. This may vary between
+   different RAW converters, it may match for some camera
+   models, and it might differ for others.
