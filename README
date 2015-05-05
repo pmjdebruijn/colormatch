@@ -113,7 +113,7 @@ unchanged, restore details for negative EV: clip, clip
 highlights for positive EV: digital linear, load Argyll's 
 ClayRGB1998.icm both as camera and output profile, with
 an absolute colorimetric rendering intent. Set output
-bit depth to 16 bit. Set gamma 1.0, linearity 1.0.
+bit depth to 16 bit. Set gamma 1,00 and linearity 0,000.
 Also make sure Embed exif data in output is enabled.
 
 Particularly for DCRaw, you can use the following command:
@@ -150,7 +150,7 @@ Darkroom mode. Make sure basecurve is disabled.
 Particularly for UFRaw, copy the resulting ICC color profile
 to a location that's convenient for you. Then load the ICC
 file from UFRaw GUI as the camera profile, make sure gamma
-and linearity are both set to 1.0.
+is set to 1,00 and linearity is set to 0,000.
 
 Particularly for DCRaw, you can use the following command:
 # dcraw -v -w -H 0 -o 1 -p my.icc -W -g 1 1 -f -m 1 -T _MG_1234.CR2
