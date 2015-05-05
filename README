@@ -221,3 +221,8 @@ A: Since RAW files aren't self-descriptive, decoding a RAW,
    be able to make sense of the data. This may vary between
    different RAW converters, it may match for some camera
    models, and it might differ for others.
+
+Q: Will there be a repository of generated profiles
+A: I currently have no desire nor time to curate a repository
+   of camera profiles. These resulting profiles should be
+   considered a personal-use item.
