@@ -91,7 +91,7 @@ resulting image as a 8bit TIFF (without compression).
 
 Processing The RAW
 ==================
-Open the respective RAW in your favoriate RAW processing 
+Open the respective RAW in your favorite RAW processing
 software, and disable all possible processing. Set linear 
 gamma (1.0) and set input and output profile to the same
 profile, and rendering intent to absolute colorimetric if 
