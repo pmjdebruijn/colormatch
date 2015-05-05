@@ -1,8 +1,10 @@
 #!/bin/bash
-#
-# Copyright 2015 Pascal de Bruijn
-#
-
+################################################################################
+#                                                                              #
+# Copyright (c) 2015 Pascal de Bruijn                                          #
+#                                                                              #
+# Distributed under the terms of The MIT License                               #
+#                                                                              #
 ################################################################################
 
 function cm_echo ()
