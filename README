@@ -25,9 +25,10 @@ Software
 ========
 To be able to use ColorMatch you need the following software:
 
- * GNU bash  (tested with 4.3.11)
- * ArgyllCMS (tested with 1.6.3 and 1.7.0)
- * Exiv2     (tested with 0.23)
+ * bash                 (4.3)
+ * argyll               (1.6.3)
+ * shared-color-targets (0.1.0)
+ * exiv2                (0.23)
 
 
 Camera Configuration
@@ -228,3 +229,9 @@ Q: Will there be a repository of generated profiles
 A: I currently have no desire nor time to curate a repository
    of camera profiles. These resulting profiles should be
    considered a personal-use item.
+
+Q: My distro does not have shared-color-targets
+A: You merely need to download R080505.it8 manually, and
+   modify the script accordingly. In this particular
+   use-case it typically won't have to match the text
+   on your actual target.
