@@ -1,12 +1,13 @@
 ColorMatch
 ==========
 ColorMatch allows you to create an ICC standard color profile 
-based on the same color transform your camera firmware would 
-apply to your RAW files.
+based on the color transform your camera firmware uses to
+create JPG files. This profile can then be applied to your
+RAW files using RAW editing software.
 
 Keep in mind that ColorMatch should be considered as highly
 experimental and requires meticulous application of the 
-procedures below in order to be succesful.
+procedures below in order to be successful.
 
 WARNING: Keep in mind that ColorMatch comes with no warranty
 whatsoever, use at your own peril.
@@ -33,7 +34,7 @@ Camera Configuration
 ====================
 Properly configuring your camera is absolutely critical for
 ColorMatch to succeed, please consult your camera manual
-for instructions on how the archieve the settings below:
+for instructions on how the achieve the settings below:
 
  * Disable Nikon Active D-Light
  * Disable Canon Auto Lighting Optimizer
@@ -54,22 +55,22 @@ for instructions on how the archieve the settings below:
 
 Shooting The Target
 ===================
-Shoot the IT8 target preferably in sunlight (have the target
-fill out most of the frame), matrix metered camera exposure 
-should be mostly right (probably +1/3EV), however it's 
-recommended to do extensive bracketing to make sure you have
-a wide range of exposures to select the right one from later
-on.
+Shoot the IT8 target preferably in direct sunlight as close
+to midday as possible. Have the target fill out most of the
+frame. matrix metered camera exposure should be mostly right
+(probably +1/3EV), however it's recommended to do extensive
+bracketing to make sure you have a wide range of exposures
+to select the right one from later on.
 
 You may need to shoot the target at a slight angle to 
 prevent glare.
 
 It's probably best not to use exotic glass to shoot the 
-target, a 50mm prime is likely ideal, if unavailable, any
+target, a 50 mm prime is likely ideal, if unavailable, any
 kit-lens should suffice. To prevent vignetting from affecting
 the procedure, it's recommended to close down the aperture
-a few stops from it's maximum value. So you'll likely end 
-up shooting at f/8 or f/11.
+a few stops from its maximum value. So you'll likely end up
+shooting at f/8 or f/11.
 
 
 Selecting The Right Exposure
@@ -86,9 +87,9 @@ chart, the value difference between the darkest and
 brightest corners should be well below 5%.
 
 If all of the above requirements have been satisfied, crop
-the chart, so only the chart remains visible. Save the 
-resulting image as a 8bit TIFF (without compression).
-
+the chart, so only the chart remains visible, including
+cropping off the text. Save the resulting image as a 8-bit
+TIFF (without compression).
 
 Processing The RAW
 ==================
@@ -97,9 +98,9 @@ software, and disable all possible processing. Set linear
 gamma (1.0) and set input and output profile to the same
 profile, and rendering intent to absolute colorimetric if 
 possible, effectively creating a color management 
-passthrough. Then apply cropping, and lens distortion
+pass-through. Then apply cropping, and lens distortion
 correction if needed, be careful not to apply lens 
-vignetting correction. Then save to a 16bit TIFF
+vignetting correction. Then save to a 16-bit TIFF
 (again without compression).
 
 Particularly for Darktable, make sure camera white balance 
@@ -113,7 +114,7 @@ unchanged, restore details for negative EV: clip, clip
 highlights for positive EV: digital linear, load Argyll's 
 ClayRGB1998.icm both as camera and output profile, with
 an absolute colorimetric rendering intent. Set output
-bit depth to 16 bit. Set gamma 1,00 and linearity 0,000.
+bit depth to 16-bit. Set gamma 1,00 and linearity 0,000.
 Also make sure Embed exif data in output is enabled.
 
 Particularly for DCRaw, you can use the following command:
@@ -159,29 +160,29 @@ Particularly for DCRaw, you can use the following command:
 Testing The Profile
 ===================
 There is no definitive way to test a generated profile, it may
-work marvelously on one image and fail horribly on another.
+work marvellously on one image and fail horribly on another.
 
 Most typical problems will likely occur in the highlights and 
 shadows. So testing a profile with overexposed and underexposed
 images is a good way to start.
 
 Other good test cases are portraits, images with clouds,
-hi-key, lo-key, etc.
+high-key, low-key, etc.
 
 
 Thanks
 ======
 A lot of people on the ArgyllCMS mailing have been very helpful,
 but one person in particular helped me in tricking ArgyllCMS
-into producing these camera emulation profiles, Klaus Karcher,
-without his help, ColorMatch may never have existed.
+into producing these camera emulation profiles: Klaus Karcher.
+Without his help, ColorMatch may never have existed.
 
 
 Donate
 ======
 ColorMatch critically hinges on tools provided free of charge
 by ArgyllCMS, so if ColorMatch has been useful for you, please 
-seriously considering donating to ArgyllCMS' author:
+seriously consider donating to ArgyllCMS' author:
 
 http://www.argyllcms.com/
 
@@ -189,7 +190,7 @@ http://www.argyllcms.com/
 Frequently Asked Questions
 ==========================
 Q: My camera does not support RAW+JPG
-A: RAW files have a lower quality embedded thumbnail, which you
+A: RAW files have a lower-quality embedded thumbnail, which you
    extract using Exiv2:
    # exiv2 -ep3 IMG_1234.CR2
    This embedded thumbnail might however be in sRGB colorspace
@@ -206,21 +207,21 @@ A: You really need this precision to easily get the right shot,
 
 Q: Can ColorMatch work with other targets
 A: In theory, yes, practically no. I've done testing with 
-   several charts, where Wolf Fausts IT8 charts are both 
+   several charts, where Wolf Faust's IT8 charts are both
    most suitable and most affordable. I have no interest 
    whatsoever in adapting ColorMatch for other types of charts.
 
 Q: Why no TIFF compression
 A: Depending on your version of ArgyllCMS it may or may not
    have been linked against a version of libtiff with deflate
-   support. Disabling compression makes sure your TIFFs will
-   be compatible.
+   support. Disabling compression means you can be sure your
+   TIFFs will be compatible.
 
-Q: Can profiles be used interchangably between RAW converters
+Q: Can profiles be used interchangeably between RAW converters
 A: Since RAW files aren't self-descriptive, decoding a RAW,
    requires RAW converters to apply arbitrary parameters to
    be able to make sense of the data. This may vary between
-   different RAW converters, it may match for some camera
+   different RAW converters; it may match for some camera
    models, and it might differ for others.
 
 Q: Will there be a repository of generated profiles
