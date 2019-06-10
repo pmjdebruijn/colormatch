@@ -1,11 +1,13 @@
 #!/bin/bash
-################################################################################
-#                                                                              #
-# Copyright (c) 2015 Pascal de Bruijn                                          #
-#                                                                              #
-# Distributed under the terms of The MIT License                               #
-#                                                                              #
-################################################################################
+#
+# Copyright (c) 2015-2019 Pascal de Bruijn
+#
+# Distributed under the terms of The MIT License
+#
+
+
+
+
 
 function cm_echo ()
 {
@@ -19,7 +21,9 @@ function cm_read ()
   if [[ $? -eq 142 ]]; then echo ""; fi
 }
 
-################################################################################
+
+
+
 
 ARGYLL_REF=/usr/share/color/argyll/ref
 
@@ -33,7 +37,9 @@ STYLE=$3
 
 CAMERA_BASE=$(echo "${CAMERA}" | sed 's/\.[^\.]*$//')
 
-################################################################################
+
+
+
 
 if [[ $# -lt 2 || $# -gt 3 ]]; then
   cm_echo 1 "SYNTAX: $0 camera.tif linear.tif [style]" 255
@@ -46,7 +52,9 @@ if [[ ! -f "${LINEAR}" ]]; then
   cm_echo 1 "ERROR: linear file '${LINEAR}' not found" 255
 fi
 
-################################################################################
+
+
+
 
 MAKE=$(exiv2 -g Exif.Image.Make -Pv "${LINEAR}" | tr -cd ' 0-9A-Za-z.,' | head -n1 | sed 's/ *$//' | sed 's/^ *//')
 MODEL=$(exiv2 -g Exif.Image.Model -Pv "${LINEAR}" | tr -cd ' 0-9A-Za-z.,' | head -n1 | sed 's/ *$//' | sed 's/^ *//')
@@ -71,7 +79,9 @@ COPY="Copyright $(date +%Y) ColorMatch"
 
 OUTPUT=$(echo ${DESCR} | tr -cd '[:alnum:] ' | tr ' ' '_')
 
-################################################################################
+
+
+
 
 cm_echo 2 "scanin: scanning camera generated image (${CAMERA})"
 
@@ -79,7 +89,9 @@ scanin -dipn -pa ${CAMERA} ${ARGYLL_REF}/${CHART}.cht /usr/share/color/targets/w
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
 mv diag.tif diag_${CAMERA}
 
-################################################################################
+
+
+
 
 cm_echo 2 "pipe: magic"
 
@@ -95,14 +107,18 @@ cat fake.ti1 | head -n $((${NUMBER_OF_SETS} + ${BEGIN_DATA})) | tail -n ${NUMBER
 
 echo 'END_DATA' >> fake.ti2
 
-################################################################################
+
+
+
 
 cm_echo 2 "fakeread: transforming camera generated image data into reference data"
 
 fakeread -v -Ir ${ARGYLL_REF}/${COLORSPACE} fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
-################################################################################
+
+
+
 
 cm_echo 2 "scanin: scanning linear raw image (${LINEAR})"
 
@@ -110,24 +126,27 @@ scanin -dipn -pa -r ${LINEAR} ${ARGYLL_REF}/${CHART}.cht fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
 mv diag.tif diag_${LINEAR}
 
-################################################################################
+
+
+
 
 cm_echo 2 "pipe: magic"
 
 cat fake.ti3 | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed 's#^DESCRIPTOR.*#DESCRIPTOR "ColorMatch"#g' | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
 
-################################################################################
+
+
+
 
 cm_echo 2 "colprof: generating icc profile (${OUTPUT}.icc)"
 
 colprof -A "${MAKE}" -M "${MODEL}" -D "${DESCR}" -C "${COPY}" -r 1 -q h -b n -a x ${OUTPUT}
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: profile generation failure" 255; fi
 
-################################################################################
+
+
+
 
 cm_echo 2 "xicclu: plotting icc profile (${OUTPUT}.icc) for inspection"
 
 xicclu -g -fif -ir ${OUTPUT}.icc 2>/dev/null
-
-################################################################################
-
