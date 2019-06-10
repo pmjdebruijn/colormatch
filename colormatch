@@ -27,9 +27,10 @@ function cm_read ()
 
 ARGYLL_REF=/usr/share/color/argyll/ref
 
-COLORSPACE=ClayRGB1998.icm
+COLORSPACE=${ARGYLL_REF}/ClayRGB1998.icm	# ${ARGYLL_REF}/sRGB.icm
 
-CHART=it8
+CHART=${ARGYLL_REF}/it8.cht
+REFERENCE=/usr/share/color/targets/wolf_faust/reflective/R080505.it8
 
 CAMERA=$1
 LINEAR=$2
@@ -85,7 +86,7 @@ OUTPUT=$(echo ${DESCR} | tr -cd '[:alnum:] ' | tr ' ' '_')
 
 cm_echo 2 "scanin: scanning camera generated image (${CAMERA})"
 
-scanin -dipn -pa ${CAMERA} ${ARGYLL_REF}/${CHART}.cht /usr/share/color/targets/wolf_faust/reflective/R080505.it8
+scanin -dipn -pa ${CAMERA} ${CHART} ${REFERENCE}
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
 mv diag.tif diag_${CAMERA}
 
@@ -113,7 +114,7 @@ echo 'END_DATA' >> fake.ti2
 
 cm_echo 2 "fakeread: transforming camera generated image data into reference data"
 
-fakeread -v -Ir ${ARGYLL_REF}/${COLORSPACE} fake
+fakeread -v -Ir ${COLORSPACE} fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 
@@ -122,7 +123,7 @@ if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 cm_echo 2 "scanin: scanning linear raw image (${LINEAR})"
 
-scanin -dipn -pa -r ${LINEAR} ${ARGYLL_REF}/${CHART}.cht fake
+scanin -dipn -pa -r ${LINEAR} ${CHART} fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
 mv diag.tif diag_${LINEAR}
 
