@@ -132,7 +132,7 @@ mv diag.tif diag_${LINEAR}
 
 cm_echo 2 "pipe: magic"
 
-cat fake.ti3 | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed 's#^DESCRIPTOR.*#DESCRIPTOR "ColorMatch"#g' | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
+cat fake.ti3 | sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF_SETS} + 1 ))#g" | sed 's#^BEGIN_DATA$#BEGIN_DATA\nA00 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000#g' | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed 's#^DESCRIPTOR.*#DESCRIPTOR "ColorMatch"#g' | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
 
 
 
