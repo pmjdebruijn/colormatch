@@ -78,7 +78,7 @@ fi
 
 COPY="Copyright $(date +%Y) ColorMatch"
 
-OUTPUT=$(echo ${DESCR} | tr -cd '[:alnum:] ' | tr ' ' '_')
+OUTPUT=ColorMatch_$(echo ${DESCR} | tr -cd '[:alnum:] ' | tr ' ' '_')
 
 
 
