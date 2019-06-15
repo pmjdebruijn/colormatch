@@ -96,17 +96,17 @@ mv diag.tif diag_${CAMERA}
 
 cm_echo 2 "pipe: magic"
 
-cat ${CAMERA_BASE}.ti3 | sed 's#CTI3#CTI1#' | sed 's#COLOR_REP "XYZ_RGB"#COLOR_REP "RGB"#' > fake.ti1
+cat ${CAMERA_BASE}.ti3 | sed 's#CTI3#CTI1#' | sed 's#COLOR_REP "XYZ_RGB"#COLOR_REP "RGB"#' > ${OUTPUT}_fake.ti1
 
 BEGIN_DATA=$(grep -n '^BEGIN_DATA$' ${CAMERA_BASE}.ti3 | awk -F ':' '{print $1}')
 
-cat fake.ti1 | sed 's#CTI1#CTI2#' |sed 's#SAMPLE_ID XYZ_X#SAMPLE_ID SAMPLE_LOC XYZ_X#g' | head -n ${BEGIN_DATA} > fake.ti2
+cat ${OUTPUT}_fake.ti1 | sed 's#CTI1#CTI2#' |sed 's#SAMPLE_ID XYZ_X#SAMPLE_ID SAMPLE_LOC XYZ_X#g' | head -n ${BEGIN_DATA} > ${OUTPUT}_fake.ti2
 
-NUMBER_OF_SETS=$(cat fake.ti1 | grep NUMBER_OF_SETS | awk '{print $2}')
+NUMBER_OF_SETS=$(cat ${OUTPUT}_fake.ti1 | grep NUMBER_OF_SETS | awk '{print $2}')
 
-cat fake.ti1 | head -n $((${NUMBER_OF_SETS} + ${BEGIN_DATA})) | tail -n ${NUMBER_OF_SETS} | while read LINE; do echo $(echo $LINE | awk '{print $1 " " $1 " " $2 " " $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10}'); done >> fake.ti2
+cat ${OUTPUT}_fake.ti1 | head -n $((${NUMBER_OF_SETS} + ${BEGIN_DATA})) | tail -n ${NUMBER_OF_SETS} | while read LINE; do echo $(echo $LINE | awk '{print $1 " " $1 " " $2 " " $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10}'); done >> ${OUTPUT}_fake.ti2
 
-echo 'END_DATA' >> fake.ti2
+echo 'END_DATA' >> ${OUTPUT}_fake.ti2
 
 
 
@@ -114,7 +114,7 @@ echo 'END_DATA' >> fake.ti2
 
 cm_echo 2 "fakeread: transforming camera generated image data into reference data"
 
-fakeread -v -Ir ${COLORSPACE} fake
+fakeread -v -Ir ${COLORSPACE} ${OUTPUT}_fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 
@@ -123,7 +123,7 @@ if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 cm_echo 2 "scanin: scanning linear raw image (${LINEAR})"
 
-scanin -dipn -pa -r ${LINEAR} ${CHART} fake
+scanin -dipn -pa -r ${LINEAR} ${CHART} ${OUTPUT}_fake
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
 mv diag.tif diag_${LINEAR}
 
@@ -133,7 +133,7 @@ mv diag.tif diag_${LINEAR}
 
 cm_echo 2 "pipe: magic"
 
-cat fake.ti3 | sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF_SETS} + 1 ))#g" | sed 's#^BEGIN_DATA$#BEGIN_DATA\nA00 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000#g' | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed "s#^DESCRIPTOR.*#DESCRIPTOR \"${DESCR}\"#g" | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
+cat ${OUTPUT}_fake.ti3 | sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF_SETS} + 1 ))#g" | sed 's#^BEGIN_DATA$#BEGIN_DATA\nA00 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000#g' | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed "s#^DESCRIPTOR.*#DESCRIPTOR \"${DESCR}\"#g" | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
 
 
 
