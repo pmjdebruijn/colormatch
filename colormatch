@@ -29,8 +29,8 @@ ARGYLL_REF=/usr/share/color/argyll/ref
 
 COLORSPACE=${ARGYLL_REF}/ClayRGB1998.icm	# ${ARGYLL_REF}/sRGB.icm
 
-CHART=${ARGYLL_REF}/it8.cht
-REFERENCE=/usr/share/color/targets/wolf_faust/reflective/R080505.it8
+CHART=colormatch.cht				# ${ARGYLL_REF}/it8.cht
+REFERENCE=colormatch.cie			# /usr/share/color/targets/wolf_faust/reflective/R080505.it8
 
 CAMERA=$1
 LINEAR=$2

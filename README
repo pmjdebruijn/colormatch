@@ -15,7 +15,11 @@ whatsoever, use at your own peril.
 
 Target
 ======
-To be able to use ColorMatch you need the following target:
+To be able to use ColorMatch you can self print your a custom
+designed target (colormatch.tif) on matte photo paper.
+
+Alternatively you can purchase a commercial IT8 chart that
+includes absolute chart (batch) reference data:
 
  * Wolf Faust C1 DIN A4 IT8 Camera Target 
    (http://www.targets.coloraid.de/)
@@ -27,7 +31,6 @@ To be able to use ColorMatch you need the following software:
 
  * bash                 (4.3)
  * argyll               (1.6.3)
- * shared-color-targets (0.1.0)
  * exiv2                (0.23)
 
 
@@ -47,16 +50,16 @@ for instructions on how the achieve the settings below:
  * Disable Pentax D-Range
  * Disable Pentax Multi Auto White Balance
  * Disable Lens correction, if possible
+ * Disable Sharpening
  * Set camera to Adobe RGB colorspace
  * Set camera to 1/3EV exposure increments
  * Set camera to base ISO (usually 100 or 200)
  * Set camera to RAW+JPG (Full Resolution, Super Fine)
- * Lower camera applied sharpening
 
 
 Shooting The Target
 ===================
-Shoot the IT8 target preferably in direct sunlight as close
+Shoot the target preferably in direct sunlight as close
 to midday as possible. Have the target fill out most of the
 frame. matrix metered camera exposure should be mostly right
 (probably +1/3EV), however it's recommended to do extensive
@@ -70,18 +73,37 @@ It's probably best not to use exotic glass to shoot the
 target, a 50 mm prime is likely ideal, if unavailable, any
 kit-lens should suffice. To prevent vignetting from affecting
 the procedure, it's recommended to close down the aperture
-a few stops from its maximum value. So you'll likely end up
+a stops or two from its maximum value. So you'll likely end up
 shooting at f/8 or f/11.
 
 
-Selecting The Right Exposure
-============================
+Selecting The Right Exposure (ColorMatch target)
+================================================
+Open a candidate JPG in GIMP and verify there is no dust or
+glare in the image. Then open the color picker, set sample
+average, use info window and get HSV values.
+
+When you sample the white E6 patch, you should see a value
+larger than 90%, and smaller than 10% for the black R1 patch.
+
+Then proceed to measure the four grey outer corners of the
+chart, the value difference between the darkest and
+brightest corners should be well below 5%.
+
+If all of the above requirements have been satisfied, crop
+the chart, so only the chart remains visible, including
+cropping off the text. Save the resulting image as a 8-bit
+TIFF (without compression).
+
+
+Selecting The Right Exposure (IT8 target)
+=========================================
 Open a candidate JPG in GIMP and verify there is no dust or
 glare in the image. Then open the color picker, set sample 
 average, use info window and get HSV values.
 
 When you sample the white GS0 patch, you should see a value
-of about 97%, and 3% for the black GS23 patch.
+larger than 90%, and smaller than 10% for the black GS23 patch.
 
 Then proceed to measure the four grey outer corners of the 
 chart, the value difference between the darkest and 
@@ -91,6 +113,7 @@ If all of the above requirements have been satisfied, crop
 the chart, so only the chart remains visible, including
 cropping off the text. Save the resulting image as a 8-bit
 TIFF (without compression).
+
 
 Processing The RAW
 ==================
@@ -175,8 +198,8 @@ Thanks
 ======
 A lot of people on the ArgyllCMS mailing have been very helpful,
 but one person in particular helped me in tricking ArgyllCMS
-into producing these camera emulation profiles: Klaus Karcher.
-Without his help, ColorMatch may never have existed.
+into producing these camera emulation profiles: Klaus Karcher,
+without his help, ColorMatch may never have existed.
 
 
 Donate
@@ -207,10 +230,11 @@ A: You really need this precision to easily get the right shot,
    huge amount of trial and error. It won't be fun.
 
 Q: Can ColorMatch work with other targets
-A: In theory, yes, practically no. I've done testing with 
-   several charts, where Wolf Faust's IT8 charts are both
-   most suitable and most affordable. I have no interest 
-   whatsoever in adapting ColorMatch for other types of charts.
+A: ColorMatch should work well with it's own self-print target
+   and Wolf Faust's C1 IT8 target. For ColorMatch to work it
+   needs a few hundred patches. You may be able to get other
+   chart to work by editing the both cht/cie files, by
+   prefixing the single digit SAMPLE_ID entries with a '0'.
 
 Q: Why no TIFF compression
 A: Depending on your version of ArgyllCMS it may or may not
@@ -230,7 +254,7 @@ A: I currently have no desire nor time to curate a repository
    of camera profiles. These resulting profiles should be
    considered a personal-use item.
 
-Q: My distro does not have shared-color-targets
+Q: My Linux distribution does not have shared-color-targets
 A: You merely need to download R080505.it8 manually, and
    modify the script accordingly. In this particular
    use-case it typically won't have to match the text
