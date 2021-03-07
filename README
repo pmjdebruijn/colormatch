@@ -16,13 +16,16 @@ whatsoever, use at your own peril.
 Target
 ======
 To be able to use ColorMatch you can self print your a custom
-designed target (colormatch.tif) on matte photo paper.
+designed target (colormatch.tif) on satin or matte photo paper.
 
 Alternatively you can purchase a commercial IT8 chart that
 includes absolute chart (batch) reference data:
 
  * Wolf Faust C1 DIN A4 IT8 Camera Target 
    (http://www.targets.coloraid.de/)
+
+ * LaserSoft Imaging DC Pro Target
+   (https://www.ebay.com/usr/it8-targetshop)
 
 
 Software
@@ -40,6 +43,7 @@ Properly configuring your camera is absolutely critical for
 ColorMatch to succeed, please consult your camera manual
 for instructions on how the achieve the settings below:
 
+ * Disable Fuji D-Rng
  * Disable Nikon Active D-Light
  * Disable Canon Auto Lighting Optimizer
  * Disable Canon Highlight Tone Priority
@@ -74,7 +78,7 @@ target, a 50 mm prime is likely ideal, if unavailable, any
 kit-lens should suffice. To prevent vignetting from affecting
 the procedure, it's recommended to close down the aperture
 a stops or two from its maximum value. So you'll likely end up
-shooting at f/8 or f/11.
+shooting at f/8 or so.
 
 
 Selecting The Right Exposure (ColorMatch target)
@@ -115,6 +119,25 @@ cropping off the text. Save the resulting image as a 8-bit
 TIFF (without compression).
 
 
+Selecting The Right Exposure (DC Pro target)
+============================================
+Open a candidate JPG in GIMP and verify there is no dust or
+glare in the image. Then open the color picker, set sample
+average, use info window and get HSV values.
+
+When you sample the white J3 patch, you should see a value
+larger than 90%, and smaller than 10% for the black J13 patch.
+
+Then proceed to measure the four grey outer corners of the
+chart, the value difference between the darkest and
+brightest corners should be well below 5%.
+
+If all of the above requirements have been satisfied, crop
+the chart, so only the chart remains visible, including
+cropping off the text. Save the resulting image as a 8-bit
+TIFF (without compression).
+
+
 Processing The RAW
 ==================
 Open the respective RAW in your favorite RAW processing
@@ -147,12 +170,17 @@ Particularly for DCRaw, you can use the following command:
 
 Running ColorMatch
 ==================
-The ColorMatch script takes three arguments, first the camera
-processed image, second the linear RAW processed by your RAW 
-converter, and optionally a style name to be included into 
-the profile description.
+The ColorMatch script takes up to six arguments:
+ (1) the camera processed image
+ (2) the linear RAW processed by your RAW converter
+ (3) optionally, a style name to be included into the profile description
+ (4) optionally, chart recognition file, defaults to ColorMatch.cht
+ (5) optionally, chart reference file, defaults to ColorMatch.cie
+ (6) optionally, camera image colorspace, attempts to autodetect
 
-# colormatch CAMERA.TIF _MG_1234.TIF Standard
+# colormatch CAMERA.TIF IMG_1234.TIF Standard
+# colormatch CAMERA.TIF IMG_1234.TIF Standard it8.cht R190808.txt sRGB.icm
+# colormatch CAMERA.TIF _MG_1234.TIF Standard LaserSoftDCPro.cht D120104.txt ClayRGB1998.icm
 
 At the end of the script, you should see a plot, which should
 be a fairly smooth curve, with in most cases a notch at the
@@ -231,10 +259,9 @@ A: You really need this precision to easily get the right shot,
 
 Q: Can ColorMatch work with other targets
 A: ColorMatch should work well with it's own self-print target
-   and Wolf Faust's C1 IT8 target. For ColorMatch to work it
-   needs a few hundred patches. You may be able to get other
-   chart to work by editing the both cht/cie files, by
-   prefixing the single digit SAMPLE_ID entries with a '0'.
+   and Wolf Faust's C1 IT8 target. Limited testing seems to
+   indicate that LaserSofts DC Pro target works fairly well
+   too. Other targets may work as well but haven't been tested.
 
 Q: Why no TIFF compression
 A: Depending on your version of ArgyllCMS it may or may not

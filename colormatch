@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2015-2019 Pascal de Bruijn
+# Copyright (c) 2015-2021 Pascal de Bruijn
 #
 # Distributed under the terms of The MIT License
 #
@@ -25,46 +25,54 @@ function cm_read ()
 
 
 
-ARGYLL_REF=/usr/share/color/argyll/ref
-
-COLORSPACE=${ARGYLL_REF}/ClayRGB1998.icm	# ${ARGYLL_REF}/sRGB.icm
-
-CHART=colormatch.cht				# ${ARGYLL_REF}/it8.cht
-REFERENCE=colormatch.cie			# /usr/share/color/targets/wolf_faust/reflective/R080505.it8
-
 CAMERA=$1
-LINEAR=$2
-STYLE=$3
-
 CAMERA_BASE=$(echo "${CAMERA}" | sed 's/\.[^\.]*$//')
 
+LINEAR=$2
+
+STYLE=$3
+
+ARGYLL_REF=/usr/share/color/argyll/ref/
+
+CHART=${4:-ColorMatch.cht}
+[[ -f ${CHART} ]] && CHART_PATH= || CHART_PATH=${ARGYLL_REF}
+
+REFERENCE=${5:-ColorMatch.cie}
+[[ -f ${REFERENCE} ]] && REFERENCE_PATH= || REFERENCE_PATH=${ARGYLL_REF}
+
+[[ "${CAMERA:0:1}" == "_" ]] && COLORSPACE_DEFAULT=ClayRGB1998.icm || COLORSPACE_DEFAULT=sRGB.icm
+COLORSPACE=${6:-${COLORSPACE_DEFAULT}}
+[[ -f ${COLORSPACE} ]] && COLORSPACE_PATH= || COLORSPACE_PATH=${ARGYLL_REF}
 
 
 
 
-if [[ $# -lt 2 || $# -gt 3 ]]; then
-  cm_echo 1 "SYNTAX: $0 camera.tif linear.tif [style]" 255
+
+if [[ $# -lt 2 || $# -gt 6 ]]; then
+  cm_echo 1 "SYNTAX: $0 camera.tif linear.tif [style] [chart.cht] [reference.cie] [colorspace.icm]"
+  cm_echo 1 "EXAMPLE: $0 camera.tif linear.tif Standard it8.cht R190808.txt sRGB.icm"
+  cm_echo 1 "EXAMPLE: $0 camera.tif linear.tif Standard LaserSoftDCPro.cht D120104.txt ClayRGB1998.icm"
+  exit 255
 fi
 
-if [[ ! -f "${CAMERA}" ]]; then
-  cm_echo 1 "ERROR: camera file '${CAMERA}' not found" 255
-fi
-if [[ ! -f "${LINEAR}" ]]; then
-  cm_echo 1 "ERROR: linear file '${LINEAR}' not found" 255
-fi
+[[ ! -f "${CAMERA}" ]] &&  cm_echo 1 "ERROR: camera image '${CAMERA}' not found" 255
+[[ ! -f "${LINEAR}" ]] &&  cm_echo 1 "ERROR: linear image '${LINEAR}' not found" 255
+[[ ! -f "${CHART_PATH}${CHART}" ]] && cm_echo 1 "ERROR: chart recognition file '${CHART_PATH}${CHART}' not found" 255
+[[ ! -f "${REFERENCE_PATH}${REFERENCE}" ]] && cm_echo 1 "ERROR: reference data '${REFERENCE_PATH}${REFERENCE}' not found" 255
+[[ ! -f "${COLORSPACE_PATH}${COLORSPACE}" ]] && cm_echo 1 "ERROR: colorspace profile '${COLORSPACE_PATH}${COLORSPACE}' not found" 255
 
-
-
-
+cm_echo 2 "chart recognition: ${CHART}"
+cm_echo 2 "reference data: ${REFERENCE}"
+cm_echo 2 "camera colorspace: ${COLORSPACE}"
 
 MAKE=$(exiv2 -g Exif.Image.Make -Pv "${LINEAR}" | tr -cd ' 0-9A-Za-z.,' | head -n1 | sed 's/ *$//' | sed 's/^ *//')
 MODEL=$(exiv2 -g Exif.Image.Model -Pv "${LINEAR}" | tr -cd ' 0-9A-Za-z.,' | head -n1 | sed 's/ *$//' | sed 's/^ *//')
 
 if [[ -z "${MAKE}" ]]; then
-  cm_echo 1 "ERROR: metadata failure, make empty" 255
+  cm_echo 3 "WARNING: metadata failure, make empty"
 fi
 if [[ -z "${MODEL}" ]]; then
-  cm_echo 1 "ERROR: metadata failure, model empty" 255
+  cm_echo 3 "WARNING: metadata failure, model empty"
 fi
 
 DESCR=$(echo -n "${MAKE} ${MODEL} ${STYLE}" | tr -cd '[:alnum:])( -' | sed 's#IMAG[A-Z]* ##gI' | sed 's#CORP[A-Z]* ##gI' | tr ' ' '\n' | uniq | tr '\n' ' ' | sed 's# $##g')
@@ -84,11 +92,21 @@ OUTPUT=ColorMatch_$(echo ${DESCR} | tr -cd '[:alnum:] ' | tr ' ' '_')
 
 
 
+cm_echo 2 "pipe: cht preprocessing"
+
+cat ${CHART_PATH}${CHART} \
+	| sed 's#\(\s\)1\(\s\)#\101\2#' \
+	| sed 's#\([A-Z]\)\([0-9]\)\(\s\)#\10\2\3#g' \
+	> ${OUTPUT}_${CHART}
+
+
+
+
+
 cm_echo 2 "scanin: scanning camera generated image (${CAMERA})"
 
-scanin -dipn -pa ${CAMERA} ${CHART} ${REFERENCE}
+scanin -dipn -pa ${CAMERA} ${OUTPUT}_${CHART} ${REFERENCE_PATH}${REFERENCE} ${OUTPUT}_Camera_Diag.tif
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
-mv diag.tif diag_${CAMERA}
 
 
 
@@ -96,17 +114,28 @@ mv diag.tif diag_${CAMERA}
 
 cm_echo 2 "pipe: magic"
 
-cat ${CAMERA_BASE}.ti3 | sed 's#CTI3#CTI1#' | sed 's#COLOR_REP "XYZ_RGB"#COLOR_REP "RGB"#' > ${OUTPUT}_fake.ti1
+cat ${CAMERA_BASE}.ti3 \
+	| sed 's#CTI3#CTI1#' \
+	| sed 's#COLOR_REP "XYZ_RGB"#COLOR_REP "RGB"#' \
+	> ${OUTPUT}_Camera.ti1
 
 BEGIN_DATA=$(grep -n '^BEGIN_DATA$' ${CAMERA_BASE}.ti3 | awk -F ':' '{print $1}')
 
-cat ${OUTPUT}_fake.ti1 | sed 's#CTI1#CTI2#' |sed 's#SAMPLE_ID XYZ_X#SAMPLE_ID SAMPLE_LOC XYZ_X#g' | head -n ${BEGIN_DATA} > ${OUTPUT}_fake.ti2
+cat ${OUTPUT}_Camera.ti1 \
+	| sed 's#CTI1#CTI2#' \
+	| sed 's#SAMPLE_ID XYZ_X#SAMPLE_ID SAMPLE_LOC XYZ_X#g' \
+	| head -n ${BEGIN_DATA} \
+	> ${OUTPUT}_Camera.ti2
 
-NUMBER_OF_SETS=$(cat ${OUTPUT}_fake.ti1 | grep NUMBER_OF_SETS | awk '{print $2}')
+NUMBER_OF_SETS=$(cat ${OUTPUT}_Camera.ti1 | grep NUMBER_OF_SETS | awk '{print $2}')
 
-cat ${OUTPUT}_fake.ti1 | head -n $((${NUMBER_OF_SETS} + ${BEGIN_DATA})) | tail -n ${NUMBER_OF_SETS} | while read LINE; do echo $(echo $LINE | awk '{print $1 " " $1 " " $2 " " $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10}'); done >> ${OUTPUT}_fake.ti2
+cat ${OUTPUT}_Camera.ti1 \
+	| head -n $((${NUMBER_OF_SETS} + ${BEGIN_DATA})) \
+	| tail -n ${NUMBER_OF_SETS} \
+	| while read LINE; do echo $(echo $LINE | awk '{print $1 " " $1 " " $2 " " $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10}'); done \
+	>> ${OUTPUT}_Camera.ti2
 
-echo 'END_DATA' >> ${OUTPUT}_fake.ti2
+echo 'END_DATA' >> ${OUTPUT}_Camera.ti2
 
 
 
@@ -114,7 +143,7 @@ echo 'END_DATA' >> ${OUTPUT}_fake.ti2
 
 cm_echo 2 "fakeread: transforming camera generated image data into reference data"
 
-fakeread -v -Ir ${COLORSPACE} ${OUTPUT}_fake
+fakeread -v -Ir ${COLORSPACE_PATH}${COLORSPACE} ${OUTPUT}_Camera
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 
@@ -123,9 +152,8 @@ if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: fakeread failure" 255; fi
 
 cm_echo 2 "scanin: scanning linear raw image (${LINEAR})"
 
-scanin -dipn -pa -r ${LINEAR} ${CHART} ${OUTPUT}_fake
+scanin -dipn -pa -r ${LINEAR} ${OUTPUT}_${CHART} ${OUTPUT}_Camera ${OUTPUT}_Linear_Diag.tif
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: chart recognition failure" 255; fi
-mv diag.tif diag_${LINEAR}
 
 
 
@@ -133,7 +161,14 @@ mv diag.tif diag_${LINEAR}
 
 cm_echo 2 "pipe: magic"
 
-cat ${OUTPUT}_fake.ti3 | sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF_SETS} + 1 ))#g" | sed 's#^BEGIN_DATA$#BEGIN_DATA\nA00 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000#g' | sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' | sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' | sed "s#^DESCRIPTOR.*#DESCRIPTOR \"${DESCR}\"#g" | sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' > ${OUTPUT}.ti3
+cat ${OUTPUT}_Camera.ti3 \
+	| sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF_SETS} + 1 ))#g" \
+	| sed 's#^BEGIN_DATA$#BEGIN_DATA\nA00 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000#g' \
+	| sed 's#DEVICE_CLASS "DISPLAY"#DEVICE_CLASS "INPUT"#g' \
+	| sed 's#COLOR_REP "RGB_XYZ"#COLOR_REP "XYZ_RGB"#g' \
+	| sed "s#^DESCRIPTOR.*#DESCRIPTOR \"${DESCR}\"#g" \
+	| sed 's#^ORIGINATOR.*#ORIGINATOR "ColorMatch"#g' \
+	> ${OUTPUT}.ti3
 
 
 
@@ -141,8 +176,17 @@ cat ${OUTPUT}_fake.ti3 | sed "s#^NUMBER_OF_SETS.*#NUMBER_OF_SETS $(( ${NUMBER_OF
 
 cm_echo 2 "colprof: generating icc profile (${OUTPUT}.icc)"
 
-colprof -A "${MAKE}" -M "${MODEL}" -D "${DESCR}" -C "${COPY}" -r 1 -q h -b n -a x ${OUTPUT}
+colprof -v -A "${MAKE}" -M "${MODEL}" -D "${DESCR}" -C "${COPY}" -r 1 -q h -b n -a x ${OUTPUT}
 if [[ $? -ne 0 ]]; then cm_echo 1 "ERROR: profile generation failure" 255; fi
+
+
+
+
+
+cm_echo 2 "cleanup: moving temporary files into subdirectory"
+
+mkdir -p $OUTPUT
+mv $OUTPUT*.{tif,ti1,ti2,ti3,cht} $OUTPUT
 
 
 
